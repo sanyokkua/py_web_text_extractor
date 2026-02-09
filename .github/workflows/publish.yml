@@ -28,7 +28,24 @@ jobs:
         run: uv sync --frozen
 
       - name: Patch pydub for Python 3.14 compatibility
-        run: uv run python scripts/patch_pydub.py
+        run: |
+          # Find pydub/utils.py without importing it
+          PYDUB_UTILS=$(find .venv -name "utils.py" -path "*/pydub/utils.py" | head -n1)
+
+          if [ -z "$PYDUB_UTILS" ]; then
+            echo "pydub/utils.py not found, skipping patch"
+            exit 0
+          fi
+
+          echo "Patching: $PYDUB_UTILS"
+
+          # Create backup
+          cp "$PYDUB_UTILS" "${PYDUB_UTILS}.bak"
+
+          # Fix all invalid escape sequences
+          sed -i.bak2 's/\\(/\\\\(/g; s/\\)/\\\\)/g' "$PYDUB_UTILS"
+
+          echo "Successfully patched pydub/utils.py"
 
       - name: Run tests
         run: uv run pytest
