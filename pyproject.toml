@@ -48,6 +48,7 @@ dev = ["pytest>=9.0.2", "pytest-cov>=7.0.0", "ruff>=0.15.0"]
 target-version = "py312"
 src = ["src", "tests"]
 line-length = 120
+extend-exclude = ["tests", "scripts/*.py"]
 
 [tool.ruff.lint]
 dummy-variable-rgx = "^_$"
