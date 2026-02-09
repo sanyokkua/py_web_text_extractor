@@ -5,7 +5,37 @@ description = "Library-wrapper for extracting text from Web Pages"
 readme = "README.md"
 authors = [{ name = "Oleksandr Kostenko", email = "sanyokkua@gmail.com" }]
 requires-python = ">=3.14"
-dependencies = ["markitdown>=0.0.2", "trafilatura>=2.0.0"]
+license = { text = "MIT" }
+keywords = [
+    "web",
+    "text",
+    "extraction",
+    "scraping",
+    "html",
+    "markdown",
+    "trafilatura",
+    "markitdown",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Text Processing",
+    "Typing :: Typed",
+]
+dependencies = ["markitdown>=0.0.2", "trafilatura>=2.0.0", "typer>=0.12.0"]
+
+[project.scripts]
+py-web-text-extractor = "py_web_text_extractor.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/sanyokkua/py_web_text_extractor"
+Repository = "https://github.com/sanyokkua/py_web_text_extractor"
+Issues = "https://github.com/sanyokkua/py_web_text_extractor/issues"
 
 [build-system]
 requires = ["uv_build>=0.9.28,<0.10.0"]
@@ -37,6 +67,8 @@ select = [
     "ERA", # eradicate (commented code)
     "PL",  # Pylint
     "RUF", # Ruff-specific rules
+    "D",   # pydocstyle (docstring linting)
+    "ANN", # flake8-annotations (type hints)
 ]
 ignore = [
     "E501",    # line too long (handled by formatter)
@@ -50,11 +82,24 @@ quote-style = "double"
 
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["S101", "ARG", "PLR2004"]
-"**/__init__.py" = ["F401"]
+"tests/**/*.py" = [
+    "S101",
+    "ARG",
+    "PLR2004",
+    "D",
+    "ANN001",
+    "ANN201",
+    "ANN202",
+    "ANN401",
+    "ANN204",
+]
+"**/__init__.py" = ["F401", "D104"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["py_web_text_extractor"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 
 # PYTEST

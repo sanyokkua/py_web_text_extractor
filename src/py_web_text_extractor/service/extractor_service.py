@@ -1,8 +1,7 @@
-"""
-Main text extraction service that coordinates between different extraction methods.
+"""Web text extraction service with fallback strategy.
 
-This module provides the primary interface for extracting text content from web pages,
-using a fallback strategy between MarkItDown and Trafilatura libraries.
+Provides a unified interface for extracting clean text content from web pages
+using MarkItDown (primary) and Trafilatura (fallback) extraction methods.
 """
 
 import logging
@@ -11,44 +10,46 @@ from typing import override
 import py_web_text_extractor.service.markitdown_extractor as mk_extractor
 import py_web_text_extractor.service.trafilatura_extractor as tr_extractor
 from py_web_text_extractor.abstract.extractor import Extractor
-from py_web_text_extractor.exception.exceptions import TextExtractionFailure, UrlIsNotValidException
+from py_web_text_extractor.exception.exceptions import (
+    MarkItDownExtractionException,
+    TextExtractionFailure,
+    TrafilaturaExtractionException,
+    UrlIsNotValidException,
+)
 from py_web_text_extractor.tools.validation import is_blank_string, is_valid_url
 
-# Configure logging
 logger = logging.getLogger(__name__)
 
 
 class ExtractorService(Extractor):
-    """
-    Main text extraction service implementing a fallback strategy.
-
-    This service attempts to extract text using MarkItDown first, and falls back
-    to Trafilatura if the first method fails. If both methods fail, a
-    TextExtractionFailure exception is raised.
-    """
+    """Text extraction service with MarkItDown/Trafilatura fallback strategy."""
 
     @override
     def extract_text_from_page(self, url: str) -> str:
-        """
-        Extract text content from a web page using a fallback strategy.
+        """Extract text content from a web page.
+
+        Attempts extraction using MarkItDown first, falling back to Trafilatura
+        if the primary method fails. Raises an exception if both methods fail.
 
         Args:
-            url: The URL of the web page to extract text from.
+            url: HTTP/HTTPS URL to extract text from. Must be a non-empty string
+                starting with http:// or https://.
 
         Returns:
-            The extracted text content as a string.
+            Cleaned text content from the web page.
 
         Raises:
-            UrlIsNotValidException: If the provided URL is invalid.
+            UrlIsNotValidException: If url is None, empty, or not a valid HTTP/HTTPS URL.
             TextExtractionFailure: If both extraction methods fail.
 
-        Example:
+        Examples:
             >>> service = ExtractorService()
             >>> text = service.extract_text_from_page("https://example.com")
-            "Example Domain\\n\\nThis domain is for use in illustrative examples..."
+            >>> len(text) > 0
+            True
         """
         if not isinstance(url, str):
-            logger.debug(f"Non-string URL provided: {url}")
+            logger.debug("Non-string URL provided: %s", url)
             raise UrlIsNotValidException(f"URL must be a string, got {type(url).__name__}")
 
         if is_blank_string(url):
@@ -56,43 +57,56 @@ class ExtractorService(Extractor):
             raise UrlIsNotValidException("URL cannot be empty or blank")
 
         if not is_valid_url(url):
-            logger.debug(f"Invalid URL provided: {url}")
+            logger.debug("Invalid URL provided: %s", url)
             raise UrlIsNotValidException(f"Invalid URL: {url}")
 
         try:
-            logger.debug(f"Attempting to extract text from {url} using MarkItDown")
+            logger.debug("Attempting to extract text from %s using MarkItDown", url)
             return mk_extractor.extract_text(url)
-        except mk_extractor.MarkItDownExtractionException as e:
-            logger.info(f"MarkItDown extraction failed for {url}: {e!s}. Falling back to Trafilatura")
-            pass  # Fall back to trafilatura
+        except MarkItDownExtractionException as e:
+            logger.info("MarkItDown extraction failed for %s: %s. Falling back to Trafilatura", url, e)
 
         try:
-            logger.debug(f"Attempting to extract text from {url} using Trafilatura")
+            logger.debug("Attempting to extract text from %s using Trafilatura", url)
             return tr_extractor.extract_text(url)
-        except tr_extractor.TrafilaturaExtractionException as e:
-            logger.warning(f"Trafilatura extraction failed for {url}: {e!s}. No more fallback options available")
-            pass  # No more fallback options
+        except TrafilaturaExtractionException as e:
+            logger.warning("Trafilatura extraction failed for %s: %s", url, e)
 
-        logger.error(f"Failed to extract text from {url} using both MarkItDown and Trafilatura")
-        raise TextExtractionFailure(f"Failed to extract text from {url} using both MarkItDown and Trafilatura")
+        error_msg = f"Failed to extract text from {url} using both MarkItDown and Trafilatura"
+        logger.error(error_msg)
+        raise TextExtractionFailure(error_msg)
 
     @override
     def extract_text_from_page_safe(self, url: str) -> str:
-        """
-        Extract text content with the same behavior as extract_text_from_page.
+        """Extract text content with graceful error handling.
 
-        This method currently has the same implementation as extract_text_from_page,
-        but could be enhanced in the future to provide additional safety features
-        such as retry logic, caching, or more graceful error handling.
+        Returns empty string on any failure instead of raising exceptions.
+        Suitable for batch processing where individual failures should not
+        interrupt the overall workflow.
 
         Args:
-            url: The URL of the web page to extract text from.
+            url: URL to extract text from (any value accepted).
 
         Returns:
-            The extracted text content as a string. On Error returns empty string.
+            Extracted text if successful, empty string otherwise.
+
+        Examples:
+            >>> service = ExtractorService()
+            >>> text = service.extract_text_from_page_safe("https://example.com")
+            >>> isinstance(text, str)
+            True
+
+            >>> service.extract_text_from_page_safe("invalid-url")
+            ''
         """
         try:
             return self.extract_text_from_page(url)
-        except Exception:
-            logger.warning("Failed to extract text")
+        except UrlIsNotValidException as e:
+            logger.warning("Invalid URL provided: %s", e)
+            return ""
+        except TextExtractionFailure as e:
+            logger.warning("Text extraction failed: %s", e)
+            return ""
+        except Exception as e:
+            logger.warning("Unexpected error during text extraction: %s", e)
             return ""

@@ -1,0 +1,111 @@
+<html>
+<head>
+    <title>Complex Documentation Page</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; }
+        header, footer { background-color: #f0f0f0; padding: 10px; text-align: center; }
+        nav ul { list-style: none; padding: 0; }
+        nav li { display: inline; margin-right: 20px; }
+        main { margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        pre { background-color: #eee; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        code { font-family: monospace; }
+        .highlight { color: blue; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome to Our Documentation</h1>
+        <nav>
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#installation">Installation</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2 id="introduction">1. Introduction to Our Amazing Project</h2>
+        <p>This section provides a general overview of the project, its goals, and how it can benefit your workflow. We aim to offer a <strong>robust</strong> and <em>efficient</em> solution for modern challenges.</p>
+        <p>You can find more details on our <a href="https://example.com/about">about page</a>.</p>
+
+        <h3 id="features">2. Key Features</h3>
+        <p>Our project boasts a variety of powerful features, designed with user experience in mind.</p>
+        <ul>
+            <li>High-performance data processing</li>
+            <li>Easy integration with existing systems</li>
+            <li>Comprehensive API documentation</li>
+            <li>Extensible plugin architecture</li>
+        </ul>
+
+        <h4>2.1 Detailed Feature Breakdown</h4>
+        <ol>
+            <li><strong>Feature A:</strong> Automated task scheduling with configurable delays.</li>
+            <li><strong>Feature B:</strong> Real-time analytics dashboard.
+                <ul>
+                    <li>Customizable widgets</li>
+                    <li>Export to CSV/PDF</li>
+                </ul>
+            </li>
+            <li><strong>Feature C:</strong> Secure user authentication using industry standards.</li>
+        </ol>
+
+        <h3 id="installation">3. Installation Guide</h3>
+        <p>Follow these steps to get started with the installation:</p>
+        <pre><code class="language-bash">
+# Clone the repository
+git clone https://github.com/your-org/your-project.git
+cd your-project
+
+# Install dependencies using uv
+uv sync
+
+# Run the project
+uv run python main.py
+        </code></pre>
+
+        <h4>3.1 Configuration Options</h4>
+        <p>Here's a table summarizing the main configuration options:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Option</th>
+                    <th>Description</th>
+                    <th>Default Value</th>
+                    <th>Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>API_KEY</code></td>
+                    <td>Your unique API access key.</td>
+                    <td>None</td>
+                    <td>Yes</td>
+                </tr>
+                <tr>
+                    <td><code>DEBUG_MODE</code></td>
+                    <td>Enable debug logging and features.</td>
+                    <td><code>False</code></td>
+                    <td>No</td>
+                </tr>
+                <tr>
+                    <td><code>PORT</code></td>
+                    <td>Port for the service to listen on.</td>
+                    <td><code>8000</code></td>
+                    <td>No</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p class="highlight">Remember to keep your API key secure!</p>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Your Organization. All rights reserved.</p>
+    </footer>
+</body>
+</html>
