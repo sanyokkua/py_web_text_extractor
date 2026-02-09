@@ -19,10 +19,13 @@ jobs:
           enable-cache: true
 
       - name: Set up Python
-        run: uv python install
+        run: uv python install 3.14
 
       - name: Install dependencies
         run: uv sync --all-groups
+
+      - name: Patch pydub for Python 3.14 compatibility
+        run: python scripts/patch_pydub.py
 
       - name: Run linting
         run: uv run ruff check .

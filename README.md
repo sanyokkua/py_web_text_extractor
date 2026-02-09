@@ -141,6 +141,13 @@ The service employs a fallback strategy to maximize reliability:
 
 To run the test suite, first install the development dependencies and then run `pytest`.
 
+> Patch pydub for Python 3.14 compatibility
+> For Python 3.14 can be required patching of old dependency
+
+```bash
+python scripts/patch_pydub.py
+```
+
 ```bash
 # Install dev dependencies
 uv pip install -e ".[dev]"
