@@ -141,13 +141,6 @@ The service employs a fallback strategy to maximize reliability:
 
 To run the test suite, first install the development dependencies and then run `pytest`.
 
-> Patch pydub for Python 3.14 compatibility
-> For Python 3.14 can be required patching of old dependency
-
-```bash
-python scripts/patch_pydub.py
-```
-
 ```bash
 # Install dev dependencies
 uv pip install -e ".[dev]"
@@ -160,6 +153,59 @@ uv run ruff check .
 uv run ruff format .
 uv run mypy src/
 ```
+
+## Python 3.14+ Compatibility Issue
+
+### Problem
+
+In Python 3.13+ and 3.14+, the `pydub` library (a dependency of `markitdown`) contains invalid escape sequences in regular expressions, which causes a `SyntaxError` during import:
+
+```
+SyntaxError: "\(" is an invalid escape sequence
+```
+
+This issue occurs because Python 3.13+ enforces stricter syntax rules for string literals, treating invalid escape sequences as hard errors instead of warnings.
+
+### Solution
+
+To fix this issue, you need to patch the `pydub/utils.py` file to escape the problematic sequences. This patch is applied automatically in the CI pipeline, but you may need to run it manually in your development environment.
+
+#### Automated Patch Script
+
+Run the following script to automatically locate and patch the `pydub` library:
+
+```bash
+#!/bin/bash
+# fix_pydub.sh - Patch pydub for Python 3.13+ compatibility
+
+# Find pydub/utils.py without importing it
+PYDUB_UTILS=$(find .venv -name "utils.py" -path "*/pydub/utils.py" | head -n1)
+
+if [ -z "$PYDUB_UTILS" ]; then
+  echo "⚠️  pydub/utils.py not found, skipping patch"
+  exit 0
+fi
+
+echo "🔧 Patching: $PYDUB_UTILS"
+
+# Create backup
+cp "$PYDUB_UTILS" "${PYDUB_UTILS}.bak"
+
+# Fix all invalid escape sequences
+sed -i.bak2 's/\\(/\\\\(/g; s/\\)/\\\\)/g' "$PYDUB_UTILS"
+
+echo "✓ Successfully patched pydub/utils.py"
+```
+
+**Usage:**
+```bash
+chmod +x fix_pydub.sh
+./fix_pydub.sh
+```
+
+### CI/CD Integration
+
+This patch is automatically applied in the GitHub Actions workflow before running tests. See `.github/workflows/publish.yml` for the implementation.
 
 ## License
 
