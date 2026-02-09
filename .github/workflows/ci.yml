@@ -25,7 +25,7 @@ jobs:
         run: uv sync --all-groups
 
       - name: Patch pydub for Python 3.14 compatibility
-        run: python scripts/patch_pydub.py
+        run: uv run python scripts/patch_pydub.py
 
       - name: Run linting
         run: uv run ruff check .
